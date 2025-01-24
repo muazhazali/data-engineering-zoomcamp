@@ -1,0 +1,35 @@
+
+2
+
+
+Question 3
+# Convert pickup datetime column to datetime format for filtering
+data['lpep_pickup_datetime'] = pd.to_datetime(data['lpep_pickup_datetime'], errors='coerce')
+
+# Filter data for trips between October 1, 2019, and November 1, 2019
+filtered_data = data[
+    (data['lpep_pickup_datetime'] >= '2019-10-01') &
+    (data['lpep_pickup_datetime'] < '2019-11-01')
+]
+
+# Remove rows with missing or invalid trip distances
+filtered_data = filtered_data[filtered_data['trip_distance'].notnull()]
+
+# Categorize trips based on distance
+ranges = {
+    "Up to 1 mile": (0, 1),
+    "1 to 3 miles": (1, 3),
+    "3 to 7 miles": (3, 7),
+    "7 to 10 miles": (7, 10),
+    "Over 10 miles": (10, float('inf'))
+}
+
+# Count trips in each range
+trip_counts = {
+    range_name: filtered_data[
+        (filtered_data['trip_distance'] > lower) & (filtered_data['trip_distance'] <= upper)
+    ].shape[0]
+    for range_name, (lower, upper) in ranges.items()
+}
+
+trip_counts
